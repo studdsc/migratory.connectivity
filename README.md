@@ -1,1 +1,1 @@
-This code supports the findings of Studds et. al 2021. Strong differences in migratory connectivity patterns among species of Neotropical‐Nearctic migratory birds revealed by combining stable isotopes and abundance in a Bayesian assignment analysis. Journal of Biogeography, In Press. 8:14895. 
+This code supports the findings of Studds et. al 2021. Strong differences in migratory connectivity patterns among species of Neotropical‐Nearctic migratory birds revealed by combining stable isotopes and abundance in a Bayesian assignment analysis. Journal of Biogeography, In Press.  
