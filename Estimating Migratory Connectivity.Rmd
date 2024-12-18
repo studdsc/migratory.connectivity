@@ -1,0 +1,61 @@
+---
+title: "Estimating Migratory Connectivity"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Estimating Migratory Connectivity Strength
+## 
+  Here, we describe the methods for estimating migratory connectivity strength using two data sets: (1) breeding ground assigment probabilites of feathers collected in the non-breeding period and (2) the geographic distance among sites where feathers were collected. We provide a worked example with Black-and=white warbler (Mniotilta varia) data.
+## 
+  We captured 140 Black-and-warbler (BAWW) from 16 non-breeding sites across the Carribean Basin. For each non-breeding site, we used Bayes rule to commbine the hydrogen isotope values in feathers with breeding abundance data and assigned them to raster cells within the breeding range. Refer to the Methods for a description of the Bayesian assignments. The anaylyses rely on four R packages.
+```{r include=TRUE}
+"library(fossil)"
+"library(gdata)"
+"library(wBoot)"
+"library(ade4)"
+```
+## 
+  We first calculate a corellation matrix of the assignment probabilites among the 16 non-breeding sites. In the resulting 16 x 16 matrix, sites with larger coefficients are more likley to host birds from the same breeding population compared to sites with smaller coefficients.
+```{r echo=FALSE}
+baww.post<-read.csv("/Users/studdsc/Google Drive/migratory connectivity/data/baww.data/baww.post.csv",header=TRUE,na.strings=NA)
+```
+```{r include=TRUE}
+(baww.cor.mat<-round(cor(baww.post),2))
+```
+## 
+  By themselves, the correllations don't provide information on migratory connectivity strenght because we don't know the distances among the non-breeding sites. Therefore,the next step is to calculate a matrix of pairwise distances among the sites in km using their latitudes and longitudes.
+```{r echo=FALSE}
+baww.sites<-read.csv("/Users/studdsc/Google Drive/migratory connectivity/data/baww.data/baww.sites.csv",header=TRUE,na.strings=NA)
+```
+```{r include=TRUE}
+baww.long.lat<-cbind(with(baww.sites,lon),with(baww.sites,lat))
+(baww.sites.mat<-round(as.matrix(fossil::earth.dist(baww.long.lat,dist=T)),2))
+```
+## 
+  We now can estimate migratory connectivity strength by calculating the Pearson correlation coefficient between the two matrices. The matrices are symetric, so we take the lower triangle of each matrix before testing their correlation.
+```{r include=TRUE}
+(baww.cor.low<-gdata::lowerTriangle(baww.cor.mat))
+(baww.sites.low<-gdata::lowerTriangle(baww.sites.mat))
+
+wBoot::boot.cor.per(baww.cor.low, baww.sites.low,conf.level = 0.95, R = 1000)
+```
+##
+  The strong negative correlation between the matrices suggest high migratory connectivity for BAWW with nearby non-breeding sites sharing birds of similar breeding origin and sites further away sharing fewer birds of similar origin. The final steep is to randomly permute one of the matrices with a Manel test in order to evaluate the significane of the correlation. Before conducting the Mantel test, we first convert the matrices to Euclidean distance matrices.
+```{r include=TRUE}
+(baww.cor.dist <- round(dist(baww.cor.mat, method = "euclidean"),2))
+(baww.sites.dist <- round(dist(baww.sites.mat, method = "euclidean"),2))
+
+ade4::mantel.rtest(baww.cor.dist, baww.sites.dist, nrepet=1000)
+```
+##
+  The Mantel test p-value supports strong migratory connnectivity for BAWW. 
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
